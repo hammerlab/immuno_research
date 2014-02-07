@@ -32,6 +32,10 @@ http://bio.math-inf.uni-greifswald.de/viscose/html/alphabets.html
 
 #hydrophilic vs. hydrophobic
 hp2 = dict_from_list(["AGTSNQDEHRKP", "CMFILVWY"])
+
 murphy10 = dict_from_list(
   ["LVIM", "C", "A", "G", "ST", "P", "FYW", "EDNQ", "KR", "H"]
 )
+
+
+alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])

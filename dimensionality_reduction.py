@@ -18,7 +18,6 @@ which the classes are linearly-separable.
 #          Gael Varoquaux
 # License: BSD 3 clause (C) INRIA 2011
 
-print(__doc__)
 from time import time
 
 import numpy as np

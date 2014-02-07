@@ -122,20 +122,21 @@ fns = [amino_acid.hydropathy,
 
 
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import normalize
+import data
 def load_dataset(filename = 'tcell_compact.csv',
                  assay_group=None,
                  unique_sequences = True,
                  # 'drop' | 'keep' | 'positive' | 'negative'
-                 noisy_labels = 'drop', 
+                 noisy_labels = 'majority', 
                  human = True, 
                  hla_type1 = True,
                  exclude_hla_a2 = False, 
                  only_hla_a2 = False, 
                  max_ngram = 1, 
 		         normalize_row = True, 
-		         reduced_alphabet = None):
+		         reduced_alphabet = None, 
+		         rebalance = False,
+		         return_transformer = False):
   assert noisy_labels in ('majority', 'drop', 'keep', 'positive', 'negative'), \
     "Invalid option: %s" % noisy_labels
 
@@ -148,31 +149,5 @@ def load_dataset(filename = 'tcell_compact.csv',
      hla_type1,
      exclude_hla_a2, 
      only_hla_a2)
-  
-  print "# IMM", len(imm)
-  print "# NON", len(non)
-  
-  if reduced_alphabet is None:
-    preprocessor = None
-  else:
-    def preprocessor(s):
-      return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
-  
-  c = CountVectorizer(analyzer='char', 
-                      ngram_range=(1,max_ngram),
-                      dtype=np.float, 
-                      preprocessor = preprocessor)
-  
-  
-  total = list(imm) + list(non)
-  # returns a sparse matrix 
-  X = c.fit_transform(total).todense()
-  if reduced_alphabet:
-    print "Alphabet", c.get_feature_names()
-  if normalize_row:
-    X = normalize(X, norm='l1')
-  Y = np.ones(len(total), dtype='bool')
-  Y[len(imm):] = 0
-  print "Dataset size", X.shape
-  return X, Y
+  return data.make_ngram_dataset(imm,non, max_ngram, normalize_row, reduced_alphabet, rebalance, return_transformer)
   

@@ -31,7 +31,9 @@ IEDB_IMM_FILE = 'IEDB_TCELL_HUMAN_IMM.txt'
 IEDB_NON_FILE = 'IEDB_TCELL_HUMAN_NON.txt'
 
 def load_iedb(exclude_imma2 = True, peptide_length = 9):
-  
+  """
+  Deprecated: use the iedb module
+  """
   iedb_imm_lines = load_lines(IEDB_IMM_FILE) 
   iedb_non_lines = load_lines(IEDB_NON_FILE)  
   
@@ -55,7 +57,76 @@ def load_iedb(exclude_imma2 = True, peptide_length = 9):
   return X, Y
   
 
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import normalize
+
+
+
+
+def make_ngram_dataset(imm, non = [], 
+                       max_ngram = 1, 
+		               normalize_row = True, 
+		               reduced_alphabet = None,
+		               rebalance = False,
+		               return_transformer = False):
+  print "# IMM", len(imm)
+  print "# NON", len(non)
+
+  if reduced_alphabet is None:
+    preprocessor = None
+  else:
+    def preprocessor(s):
+      return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
   
+  
+  c = CountVectorizer(analyzer='char', 
+                      ngram_range=(1,max_ngram),
+                      dtype=np.float, 
+                      preprocessor = preprocessor)
+  
+  total = list(imm) + list(non)
+  # returns a sparse matrix 
+  X = c.fit_transform(total).todense()
+  
+  n_imm = len(imm)
+  n_non = len(non)
+    
+  if rebalance:
+    X_true = X[:n_imm]
+    X_false = X[n_imm:]
+    n_min = min(n_imm, n_non)
+    idx = np.arange(n_imm)
+    np.random.shuffle(idx)
+    X_true = X_true[idx[:n_min]]
+    idx = np.arange(n_non)
+    np.random.shuffle(idx)
+    X_false = X_false[idx[:n_min]]
+    X = np.vstack([X_true, X_false])
+    Y = np.ones(2*n_min, dtype='bool')
+    Y[n_min:] = False
+    print "Rebalancing %d, %d -> %d" % (n_imm, n_non, n_min)
+  else:
+    Y = np.ones(len(total), dtype='bool')
+    Y[n_imm:] = 0
+  
+  if reduced_alphabet:
+    print "Alphabet", c.get_feature_names()
+  if normalize_row:
+    X = normalize(X, norm='l1')
+  print "Dataset size", X.shape
+  if return_transformer:
+    def transform(test_strings):
+      X_test = c.transform(test_strings).todense()
+      if normalize_row:
+        X_test = normalize(X_test, norm='l1')
+      return X_test
+    
+    return X, Y, transform
+  else:
+    return X, Y
+
   
   
 
