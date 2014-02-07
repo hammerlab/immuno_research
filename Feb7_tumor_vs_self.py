@@ -12,6 +12,11 @@ import iedb
 import reduced_alphabet 
 import eval_dataset
 
+
+"""
+Conclusion: we can't use an immunogenicity predictor to distinguish potentially immunogenic self epitopes from novel mutant epitopes. This makes sense, since all the source data is just t-cell response assays, without any label for whether it's a useful t-cell response. 
+"""
+
 with open("Tumor_Mutant_Antigens_HLA_I.txt") as f:
   cancer_peptides = f.read().splitlines()
 
