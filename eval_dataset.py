@@ -24,7 +24,7 @@ def _eval_classifier(classifier_name, clf, X_train, Y_train, X_test, Y_test):
   Y_pred = clf.predict(X_test)
   acc = np.mean(Y_test == Y_pred)
   print classifier_name, "Accuracy", acc
-  if np.unique(Y_test) != 2:
+  if len(np.unique(Y_test)) != 2:
     print "Skipping AUC"
     return acc
   Y_prob = clf.predict_proba(X_test)

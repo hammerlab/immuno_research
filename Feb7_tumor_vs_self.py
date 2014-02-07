@@ -15,9 +15,16 @@ import eval_dataset
 with open("Tumor_Mutant_Antigens_HLA_I.txt") as f:
   cancer_peptides = f.read().splitlines()
 
+with open("Tumor_Self_Antigens_HLA_I.txt") as f:
+  self_peptides = f.read().splitlines()
+
+
 def run(x,y, f):
-  x_test = f(cancer_peptides)
-  y_test = np.array([True] * len(cancer_peptides))
+  x_test_true = f(cancer_peptides)
+  x_test_false = f(self_peptides)
+  x_test = np.vstack([x_test_true, x_test_false])
+  y_test = np.ones(x_test.shape[0], dtype='bool')
+  y_test[len(x_test_true):] = 0
   eval_dataset.eval_split(x,y,x_test,y_test)
   
 ASSAY = 'cytotoxicity'

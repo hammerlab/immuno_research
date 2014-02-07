@@ -39,3 +39,5 @@ murphy10 = dict_from_list(
 
 
 alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
+
+aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
