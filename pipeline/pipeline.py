@@ -28,7 +28,7 @@ class ImmunoPipeline():
     return data
 
 
-class PipelineElement():
+class PipelineElement(object):
   def __init__(self, name):
     self.name = name
     pass

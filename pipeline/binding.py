@@ -17,25 +17,28 @@ class IEDBMHCBinding(PipelineElement):
     self._url = url
     self._alleles = ",".join(alleles)
 
-  def query_iedb(self, sequence):
-    request_values = {
-
+  def _get_iedb_request_params(self, sequence):
+    params = {
         "method" : self._method,
         "length" : ",".join(str(l) for l in self._lengths),
         "sequence_text" : sequence,
         "allele" : self._alleles,
     }
+    return params
 
+  def query_iedb(self, sequence):
+    request_values = self._get_iedb_request_params(sequence)
     print "Calling iedb with", sequence, self._alleles
-    try:
-      data = urllib.urlencode(request_values)
-      req = urllib2.Request(self._url, data)
-      response = urllib2.urlopen(req).read()
+    #try:
+    data = urllib.urlencode(request_values)
+    req = urllib2.Request(self._url, data)
+    response = urllib2.urlopen(req).read()
 
-      return pd.read_csv(StringIO(response), sep='\t', na_values=['-'])
-    except:
-      print "Connection error: Failed on sequence", sequence
-      return pd.DataFrame()
+    return pd.read_csv(StringIO(response), sep='\t', na_values=['-'])
+    #except:
+    #  print req
+    #  print "Connection error: Failed on sequence", sequence
+    #  return pd.DataFrame()
 
   def apply(self,data):
     responses = []
@@ -45,8 +48,28 @@ class IEDBMHCBinding(PipelineElement):
 
     return pd.concat(responses)
 
+class IEDBMHC1Binding(IEDBMHCBinding):
+    def __init__(self, name = 'IEDB-MHC1-Binding', url='http://tools.iedb.org/tools_api/mhci/', alleles=[]):
+      super(IEDBMHC1Binding, self).__init__(name = name, url = url, alleles = alleles)
+
+
+class IEDBMHC2Binding(IEDBMHCBinding):
+    def __init__(self, name = 'IEDB-MHC2-Binding', url='http://tools.iedb.org/tools_api/mhcii/', alleles=[]):
+      super(IEDBMHC2Binding, self).__init__(name = name, url = url, alleles = alleles)
+
+    def _get_iedb_request_params(self, sequence):
+      params = {
+        "method" : self._method,
+        "sequence_text" : sequence,
+        "allele" : self._alleles,
+      }
+      return params
+
 
 
 if __name__ == '__main__':
-  iedb = IEDBMHCBinding(alleles=['HLA-C*12:03', 'HLA-C*12:02'])
+  iedb = IEDBMHC1Binding(alleles=['HLA-C*12:03', 'HLA-C*12:02'])
+  print iedb.query_iedb("APHHSGVYPVNVQLYEAWKKV")
+
+  iedb = IEDBMHC2Binding(alleles=['HLA-DRB1*01:01','H2-IAb'])
   print iedb.query_iedb("APHHSGVYPVNVQLYEAWKKV")
