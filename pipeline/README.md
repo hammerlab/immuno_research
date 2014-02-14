@@ -14,7 +14,7 @@
 
 ```sh
 
-python cancer_pipeline.py --fasta <fasta_file> --output <output_file> 
+python cancer_pipeline.py --input <fasta_file> --output <output_file> 
 
 ```
 
