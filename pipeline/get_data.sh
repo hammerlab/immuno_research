@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Download iedb
-wget http://www.iedb.org/download_manager.php?filename=tcell_compact.zip
+wget http://www.iedb.org/doc/tcell_compact.zip
 unzip tcell_compact.zip
 
 # Download ensembl data
