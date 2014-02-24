@@ -10,11 +10,15 @@ from binding import IEDBMHCBinding
 from cleavage import ProteasomalCleavage
 import reduced_alphabet
 from Bio import SeqIO
+from maf_to_epitopes import get_eptiopes_from_maf
 import pandas as pd
 
-def get_epitopes_from_fasta(fasta_file):
-  epitope_data = SeqIO.parse(fasta_file, 'fasta')
-  return pd.Series(list(set([e.seq for e in epitope_data])))
+def get_epitopes_from_fasta(fasta_files):
+  epitopes = []
+  for fasta_file in fasta_files:
+    epitope_data = SeqIO.parse(fasta_file, 'fasta')
+    epitopes += [pd.DataFrame({'peptide':  pd.Series(list(set([e.seq for e in epitope_data])))})]
+  return pd.concat(epitopes)
 
 
 def create_pipeline():
@@ -30,23 +34,23 @@ def add_scoring(pipeline, alleles):
 
   return pipeline
 
-DEFAULT_ALLELE = 'HLA-A*24:92'
+DEFAULT_ALLELE = 'HLA-A*02:01'
 
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser()
   parser = argparse.ArgumentParser()
-  parser.add_argument("--input", help="input file to process")
+  parser.add_argument("--input", action="append", default=[], help="input file to process")
   parser.add_argument("--allele_file", help="list of alleles")
   parser.add_argument("--output", help="output file for dataframes", required=True)
 
 
   args = parser.parse_args()
-  if args.input.endswith(".vcf"):
+  if args.input[0].endswith(".vcf"):
     epitope_data = pipeline.add(Variant2Epitope)
-  elif args.input.endswith(".maf"):
-    epitope_data = pipeline.add(MafEpitope)
-  elif args.input.endswith(".fasta") or args.input.endswith(".fa"):
+  elif args.input[0].endswith(".maf"):
+    epitope_data = get_eptiopes_from_maf(args.input)
+  elif args.input[0].endswith(".fasta") or args.input[0].endswith(".fa"):
     epitope_data =  get_epitopes_from_fasta(args.input)
 
   if args.allele_file:
