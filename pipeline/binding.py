@@ -10,7 +10,7 @@ from StringIO import StringIO
 
 class IEDBMHCBinding(PipelineElement):
 
-  def __init__(self, alleles=[], name="IEDB-MHC-Binding", method='recommended', lengths = [8,9,10,11], url='http://tools.iedb.org/tools_api/mhci/'):
+  def __init__(self, alleles=[], name="IEDB-MHC-Binding", method='recommended', lengths = [9,10,11], url='http://tools.iedb.org/tools_api/mhci/'):
     self.name = name
     self._method = method
     self._lengths = lengths
@@ -29,24 +29,23 @@ class IEDBMHCBinding(PipelineElement):
   def query_iedb(self, sequence):
     request_values = self._get_iedb_request_params(sequence)
     print "Calling iedb with", sequence, self._alleles
-    #try:
-    data = urllib.urlencode(request_values)
-    req = urllib2.Request(self._url, data)
-    response = urllib2.urlopen(req).read()
+    try:
+      data = urllib.urlencode(request_values)
+      req = urllib2.Request(self._url, data)
+      response = urllib2.urlopen(req).read()
 
-    return pd.read_csv(StringIO(response), sep='\t', na_values=['-'])
-    #except:
-    #  print req
-    #  print "Connection error: Failed on sequence", sequence
-    #  return pd.DataFrame()
+      return pd.read_csv(StringIO(response), sep='\t', na_values=['-'])
+    except:
+      print "Connection error: Failed on sequence", sequence
+      return pd.DataFrame()
 
   def apply(self,data):
-    responses = []
-    for peptide in data:
-       responses += [self.query_iedb(peptide)]
-    
-
-    return pd.concat(responses)
+    responses = {}
+    for epitope in data.Epitope:
+       responses[epitope] = self.query_iedb(epitope)
+    responses = pd.concat(responses).reset_index(0)
+    responses.rename(columns={'level_0':'Epitope'}, inplace=True)
+    return data.merge(responses, on='Epitope')
 
 class IEDBMHC1Binding(IEDBMHCBinding):
     def __init__(self, name = 'IEDB-MHC1-Binding', url='http://tools.iedb.org/tools_api/mhci/', alleles=[]):
