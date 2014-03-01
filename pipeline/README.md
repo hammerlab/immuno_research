@@ -3,12 +3,9 @@
 
 ### Todo
 
-- VCF input support (VCF -> annotations -> transcript IDs -> insert mutation on trancript -> translation)
-- MAF input support
-- - Same sample information/id 
+
 - Check peptides against all self-peptides - save index instead of indexing every run
 - Add proteasomal cleavage model (NetChop or SMM method (smm matrices are available but only seem appropriate for 6mers))
-- Investigate TAP models
 
 
 ### Usage
@@ -16,7 +13,7 @@
 ```sh
 ./get_data.sh
 
-python cancer_pipeline.py --input <fasta_file> --output <output_file> 
+python cancer_pipeline.py --input <.maf, .dbnsfp, .fasta> --output <output_file> 
 
 ```
 
