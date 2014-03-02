@@ -88,12 +88,7 @@ def load_csv(filename = 'tcell_compact.csv',
   
   counts = groups.count()
   values = groups.mean()
-  print values
-  print len(values)
   values = values[counts > min_count]
-  print "FILTERED"
-  print values 
-  print len(values)
   
   if noisy_labels == 'percent':
     return values
