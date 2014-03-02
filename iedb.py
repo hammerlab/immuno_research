@@ -13,7 +13,8 @@ def load_csv(filename = 'tcell_compact.csv',
              only_hla_a2 = False,
              peptide_length = None, 
              nrows = None,
-             min_count = 0):
+             min_count = 0,
+             key_by_allele = True):
              
   df = pd.read_csv(filename, skipinitialspace=True, nrows = nrows)
   mhc = df['MHC Allele Name']
@@ -59,7 +60,6 @@ def load_csv(filename = 'tcell_compact.csv',
     mask &= df['Assay Group'] == assay_group
   
   hla_a2_mask = (mhc == 'HLA-A2') | mhc.str.startswith('HLA-A\*02', na=False)
-  print "HLA A-2 count:", hla_a2_mask.sum() 
   if exclude_hla_a2:
     mask &= ~hla_a2_mask
     
@@ -78,11 +78,16 @@ def load_csv(filename = 'tcell_compact.csv',
   
   pos_mask = df['Qualitative Measure'].str.startswith('Positive').astype('bool')
   
-  groups = pos_mask.groupby(epitopes)
+  if key_by_allele:
+    groups = pos_mask.groupby([epitopes, mhc])
+  else:
+    groups = pos_mask.groupby(epitopes)
   
-  counts = groups.count()
   values = groups.mean()
-  values = values[counts > min_count]
+  
+  if min_count:
+    counts = groups.count()
+    values = values[counts > min_count]
   
   if noisy_labels == 'percent':
     return values
