@@ -34,3 +34,10 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+*.csv
+
+.DS_Store
+
+*.png
+*.swp
