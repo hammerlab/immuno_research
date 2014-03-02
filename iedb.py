@@ -14,7 +14,7 @@ def load_csv(filename = 'tcell_compact.csv',
              peptide_length = None, 
              nrows = None,
              min_count = 0,
-             key_by_allele = True):
+             key_by_allele = False):
              
   df = pd.read_csv(filename, skipinitialspace=True, nrows = nrows)
   mhc = df['MHC Allele Name']
@@ -131,28 +131,32 @@ def load_tcell(assay_group=None,
                hla_type = None, # 1, 2, or None for neither
                peptide_length = None, 
                nrows = None, 
-               min_count = 0):
+               min_count = 0, 
+               key_by_allele = False):
   return load_csv('tcell_compact.csv', 
                   assay_group = assay_group, 
                   noisy_labels = 'percent',
                   hla_type = hla_type, 
                   peptide_length = peptide_length, 
                   nrows = nrows,
-                  min_count = min_count)
+                  min_count = min_count,
+                  key_by_allele = key_by_allele)
                   
 
 def load_mhc(assay_group=None, 
                hla_type = None, # 1, 2, or None for neither
                peptide_length = None, 
                nrows = None,
-               min_count = 0):
+               min_count = 0, 
+               key_by_allele = False):
   return load_csv('elution_compact.csv', 
                   assay_group = assay_group, 
                   noisy_labels = 'percent',
                   hla_type = hla_type, 
                   peptide_length = peptide_length, 
                   nrows = nrows,
-                  min_count = min_count)
+                  min_count = min_count,
+                  key_by_allele = key_by_allele)
 
 import numpy as np 
 import amino_acid
