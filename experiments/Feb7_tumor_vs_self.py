@@ -6,18 +6,27 @@ import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.linear_model
 
-import data 
-import amino_acid
-import iedb
-import reduced_alphabet 
+from ..data import amino_acid, iedb, reduced_alphabet
 import eval_dataset
 
-with open("Tumor_Mutant_Antigens_HLA_I.txt") as f:
+
+"""
+Conclusion: we can't use an immunogenicity predictor to distinguish potentially immunogenic self epitopes from novel mutant epitopes. This makes sense, since all the source data is just t-cell response assays, without any label for whether it's a useful t-cell response. 
+"""
+
+with open("../data/Tumor_Mutant_Antigens_HLA_I.txt") as f:
   cancer_peptides = f.read().splitlines()
 
+with open("../data/Tumor_Self_Antigens_HLA_I.txt") as f:
+  self_peptides = f.read().splitlines()
+
+
 def run(x,y, f):
-  x_test = f(cancer_peptides)
-  y_test = np.array([True] * len(cancer_peptides))
+  x_test_true = f(cancer_peptides)
+  x_test_false = f(self_peptides)
+  x_test = np.vstack([x_test_true, x_test_false])
+  y_test = np.ones(x_test.shape[0], dtype='bool')
+  y_test[len(x_test_true):] = 0
   eval_dataset.eval_split(x,y,x_test,y_test)
   
 ASSAY = 'cytotoxicity'

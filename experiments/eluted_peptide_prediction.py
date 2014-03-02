@@ -4,8 +4,7 @@ import pandas as pd
 from sklearn import ensemble
 from sklearn import linear_model
 from sklearn.cross_validation import cross_val_score
-import data
-import reduced_alphabet
+from .. data import make_ngram_dataset
 
 """
 Build models off Dana-Farber Repository for Machine Learning in Immunology
@@ -40,6 +39,6 @@ if __name__ == '__main__':
   print EB.count()
   print N.count()
 
-  X, Y = data.make_ngram_dataset(EB.Peptide, N.Peptide, max_ngram=2, normalize_row=True, rebalance=True)
+  X, Y = make_ngram_dataset(EB.Peptide, N.Peptide, max_ngram=2, normalize_row=True, rebalance=True)
 
   print cross_val_score(model, X, Y, scoring='roc_auc')

@@ -2,9 +2,7 @@ import scipy
 import scipy.sparse
 import numpy as np 
 
-import iedb 
-import amino_acid 
-from amino_acid import peptide_to_indices
+from ..data import iedb, amino_acid, peptide_to_indices
 
 ASSAY = 'cytotoxicity'
 LENGTH = 9

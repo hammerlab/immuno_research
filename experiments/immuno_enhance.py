@@ -1,10 +1,12 @@
+from collections import defaultdict
 
 import numpy as np
-import imma
+
 from sklearn.cross_validation import cross_val_score
 from sklearn.base import BaseEstimator
 from sklearn.metrics import roc_auc_score
-from collections import defaultdict
+
+from ..data import imma 
 
 
 """

@@ -24,6 +24,10 @@ def load_dataset(imm_file, non_file):
   return X, Y
   
 def load_imma2():
+  """
+    Deprecrated, use the imma module instead. 
+    Still in the repo since it's used by older experiments
+  """
   return load_dataset(IMMA2_IMM_FILE, IMMA2_NON_FILE)
   
   
@@ -127,12 +131,8 @@ def make_ngram_dataset(imm, non = [],
   else:
     return X, Y
 
-  
-  
 
-
-
-def transform(X, fns, positions = None, mean = False, pairwise_ratios = False):
+def transform_features(X, fns, positions = None, mean = False, pairwise_ratios = False):
   X2 = []
   for x in X:
     row = []

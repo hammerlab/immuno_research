@@ -1,8 +1,8 @@
 import numpy as np 
-import data 
-import amino_acid
 
-X,Y = data.load_dataset(data.IMMA2_IMM_FILE, data.IMMA2_NON_FILE)
+from ..data import transform_features, amino_acid, load_imma2
+
+X,Y = load_imma2()
 
 import sklearn
 import sklearn.cross_validation 
@@ -27,15 +27,15 @@ fns = [amino_acid.hydropathy,
        amino_acid.refractivity]
 
 print "All features, all positions"
-X2 = data.transform(X, fns)
+X2 = transform_features(X, fns)
 print np.mean(sklearn.cross_validation.cross_val_score(clf, X2, Y, cv = 10))
 
 print "Mean per feature"
-X3 = data.transform(X, fns, mean = True)
+X3 = transform_features(X, fns, mean = True)
 print np.mean(sklearn.cross_validation.cross_val_score(clf, X3, Y, cv = 10))
 
 print "Positions 4,6,8,9"
-X4 = data.transform(X, fns, positions = (4,6,8,9))
+X4 = data.transform_features(X, fns, positions = (4,6,8,9))
 print np.mean(sklearn.cross_validation.cross_val_score(clf, X4, Y, cv = 10))
 
 

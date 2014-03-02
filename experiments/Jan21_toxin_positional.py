@@ -1,15 +1,15 @@
 import numpy as np 
-import data 
-import amino_acid
+
 
 import sklearn
 import sklearn.cross_validation 
 import sklearn.ensemble
 import sklearn.svm
 
+from ..data import load_toxin_features, amino_acid
 
 print "Loading data and transforming to toxin features"
-X,Y = data.load_toxin_features(substring_length=3, positional=True)
+X,Y = load_toxin_features(substring_length=3, positional=True)
 print X[0]
 def run_classifiers(X,Y):
   print "Data shape", X.shape
