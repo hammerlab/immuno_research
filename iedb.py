@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
-
-
 def load_csv(filename = 'tcell_compact.csv', 
              assay_group=None, 
              unique_sequences = True, 
@@ -69,7 +66,6 @@ def load_csv(filename = 'tcell_compact.csv',
   if only_hla_a2:
     mask &= hla_a2_mask
   
-  
   epitopes = df['Epitope Linear Sequence'].str.upper()
   
   if peptide_length:
@@ -80,9 +76,7 @@ def load_csv(filename = 'tcell_compact.csv',
   
   df = df[mask]
   
-  
   pos_mask = df['Qualitative Measure'].str.startswith('Positive').astype('bool')
-
   
   groups = pos_mask.groupby(epitopes)
   
