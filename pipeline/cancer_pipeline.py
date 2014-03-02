@@ -11,6 +11,7 @@ from cleavage import ProteasomalCleavage
 import reduced_alphabet
 from Bio import SeqIO
 from maf_to_epitopes import get_eptiopes_from_maf
+from epitope_generation import Variant2Epitope
 import pandas as pd
 
 def get_epitopes_from_fasta(fasta_files):
@@ -47,11 +48,15 @@ if __name__ == '__main__':
 
   args = parser.parse_args()
   if args.input[0].endswith(".vcf"):
-    epitope_data = pipeline.add(Variant2Epitope)
+    pass
   elif args.input[0].endswith(".maf"):
     epitope_data = get_eptiopes_from_maf(args.input)
   elif args.input[0].endswith(".fasta") or args.input[0].endswith(".fa"):
     epitope_data =  get_epitopes_from_fasta(args.input)
+  elif args.input[0].endswith(".dbnsfp"):
+    converter = Variant2Epitope()
+    epitope_data =  converter.generate_epitopes_from_annotations(args.input[0])
+    print epitope_data.head()
 
   if args.allele_file:
     alleles = [l.strip() for l in open(allele_file)]
