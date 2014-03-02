@@ -15,7 +15,8 @@ def load_csv(filename = 'tcell_compact.csv',
              exclude_hla_a2 = False,
              only_hla_a2 = False,
              peptide_length = None, 
-             nrows = None):
+             nrows = None,
+             min_count = 0):
              
   df = pd.read_csv(filename, skipinitialspace=True, nrows = nrows)
   mhc = df['MHC Allele Name']
@@ -83,20 +84,29 @@ def load_csv(filename = 'tcell_compact.csv',
   pos_mask = df['Qualitative Measure'].str.startswith('Positive').astype('bool')
 
   
-  if noisy_labels in ('majority', 'percent'):
-    groups = pos_mask.groupby(epitopes)
-    values = groups.mean()
-    if noisy_labels == 'percent':
-      return values
-    
+  groups = pos_mask.groupby(epitopes)
+  
+  counts = groups.count()
+  values = groups.mean()
+  print values
+  print len(values)
+  values = values[counts > min_count]
+  print "FILTERED"
+  print values 
+  print len(values)
+  
+  if noisy_labels == 'percent':
+    return values
+  elif noisy_labels == 'majority':
     pos_mask = values >= 0.5
-    neg_mask = ~pos_mask
-    pos = pos_mask.index[pos_mask]
-    neg = neg_mask.index[neg_mask] 
+  elif noisy_labels == 'positive':
+    pos_mask = values > 0
   else:
-    neg_mask = df['Qualitative Measure'] == 'Negative'
-    pos = epitopes[pos_mask]
-    neg = epitopes[neg_mask]
+    pos_mask = values == 1.0
+    
+  neg_mask = ~pos_mask
+  pos = pos_mask.index[pos_mask]
+  neg = neg_mask.index[neg_mask] 
   
   pos_set = set(pos)
   neg_set = set(neg)
@@ -126,25 +136,29 @@ def load_csv(filename = 'tcell_compact.csv',
 def load_tcell(assay_group=None, 
                hla_type = None, # 1, 2, or None for neither
                peptide_length = None, 
-               nrows = None):
+               nrows = None, 
+               min_count = 0):
   return load_csv('tcell_compact.csv', 
                   assay_group = assay_group, 
                   noisy_labels = 'percent',
                   hla_type = hla_type, 
                   peptide_length = peptide_length, 
-                  nrows = nrows)
+                  nrows = nrows,
+                  min_count = min_count)
                   
 
 def load_mhc(assay_group=None, 
                hla_type = None, # 1, 2, or None for neither
                peptide_length = None, 
-               nrows = None):
+               nrows = None,
+               min_count = 0):
   return load_csv('elution_compact.csv', 
                   assay_group = assay_group, 
                   noisy_labels = 'percent',
                   hla_type = hla_type, 
                   peptide_length = peptide_length, 
-                  nrows = nrows)
+                  nrows = nrows,
+                  min_count = min_count)
 
 import numpy as np 
 import amino_acid
