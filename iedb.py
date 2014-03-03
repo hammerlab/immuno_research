@@ -144,11 +144,11 @@ def load_tcell(assay_group=None,
                   
 
 def load_mhc(assay_group=None, 
-               hla_type = None, # 1, 2, or None for neither
-               peptide_length = None, 
-               nrows = None,
-               min_count = 0, 
-               key_by_allele = False):
+             hla_type = None, # 1, 2, or None for neither
+             peptide_length = None, 
+             nrows = None,
+             min_count = 0, 
+             key_by_allele = False):
   return load_csv('elution_compact.csv', 
                   assay_group = assay_group, 
                   noisy_labels = 'percent',
@@ -157,6 +157,31 @@ def load_mhc(assay_group=None,
                   nrows = nrows,
                   min_count = min_count,
                   key_by_allele = key_by_allele)
+
+def load_tcell_vs_mhc(assay_group=None, 
+                      hla_type = None, # 1, 2, or None for neither
+                      peptide_length = None, 
+                      nrows = None,
+                      min_count = 0, 
+                      key_by_allele = False):
+  
+  
+  mhc = load_mhc(assay_group=assay_group,
+                     hla_type = hla_type, 
+                     peptide_length = peptide_length,
+                     nrows = nrows,
+                     min_count = min_count, 
+                     key_by_allele = key_by_allele)
+  tcell = load_tcell(assay_group=assay_group,
+                     hla_type = hla_type, 
+                     peptide_length = peptide_length,
+                     nrows = nrows,
+                     min_count = min_count, 
+                     key_by_allele = key_by_allele)
+                     
+  df_combined = pd.DataFrame({'mhc':mhc, 'tcell':tcell})
+  both = ~(df_combined.mhc.isnull() | df_combined.tcell.isnull())
+  return df_combined[both]
 
 import numpy as np 
 import amino_acid
