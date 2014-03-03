@@ -2,10 +2,10 @@
 
 """
 
-Given a fasta file of a proteome, write out a pickle file with all the epitopes of the given length.
+Given a fasta file of a proteome, write out a pickle file with all the self epitopes of the given length.
 
 ./generate_self_epitopes.py --size 9 --size 10 --size 11 --size 12 \
-	--fasta data/HUMAN.fasta.gz \
+  --fasta data/HUMAN.fasta.gz \
   self_epitopes.csv
 
 With --size 10 on the human human proteome, this takes ~2 minutes and writes out a 144 mb file with 
@@ -22,19 +22,19 @@ import common
 def fasta_to_epitopes(filenames, sizes):
   epitopes = collections.Counter()
   for filename in filenames:
-	logging.info("loading: %s", filename)
-	if filename.endswith(".gz"):
-		fd = gzip.GzipFile(filename)
-	else:
-		fd = open(filename)
-	gen = Bio.SeqIO.parse(fd, "fasta")
-	for record in gen:
-		seq = str(record.seq)
-		for size in sizes:
-			for i in range(len(record.seq) - size + 1):
-				epitopes[seq[i:i+size]] += 1
-	fd.close()
-	return pandas.DataFrame(epitopes.most_common(), columns=["Epitope", "Num Occurrences"])
+    logging.info("loading: %s", filename)
+    if filename.endswith(".gz"):
+      fd = gzip.GzipFile(filename)
+    else:
+      fd = open(filename)
+    gen = Bio.SeqIO.parse(fd, "fasta")
+    for record in gen:
+      seq = str(record.seq)
+      for size in sizes:
+        for i in range(len(record.seq) - size + 1):
+          epitopes[seq[i:i+size]] += 1
+  fd.close()
+  return pandas.DataFrame(epitopes.most_common(), columns=["Epitope", "Num Occurrences"])
 
 def go():
   parser = argparse.ArgumentParser(usage = __doc__)
