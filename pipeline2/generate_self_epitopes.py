@@ -5,7 +5,7 @@
 Given a fasta file of a proteome, write out a pickle file with all the self epitopes of the given length.
 
 ./generate_self_epitopes.py --size 9 --size 10 --size 11 --size 12 \
-  --fasta data/HUMAN.fasta.gz \
+  --fasta data/fasta/Homo_sapiens.GRCh37.75.pep.all.fa.gz
   self_epitopes.csv
 
 With --size 10 on the human human proteome, this takes ~2 minutes and writes out a 144 mb file with 

@@ -2,6 +2,7 @@
 
 mkdir -p data/refseq
 mkdir -p data/maf
+mkdir -p data/fasta
 
 # MAF files of interest
 # Lung squamous
@@ -12,6 +13,11 @@ wget --directory-prefix=data/maf -nc \
 wget --directory-prefix=data/maf -nc \
 https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/hnsc/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/broad.mit.edu_HNSC.IlluminaGA_DNASeq.Level_2.1.0.0/PR_TCGA_HNSC_PAIR_Capture_TP-NT_TP-NB.aggregated.capture.tcga.uuid.somatic.maf
 
+# Human proeteome
+wget --directory-prefix=data/fasta -nc \
+	ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/pep/Homo_sapiens.GRCh37.75.pep.all.fa.gz
+
 # Full proteome
 wget --directory-prefix=data/refseq -nc \
 	ftp://ftp.ncbi.nlm.nih.gov/refseq/release/vertebrate_mammalian/*.faa.gz
+
