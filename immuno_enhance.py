@@ -1,11 +1,11 @@
 
 import numpy as np
-import imma
 from sklearn.cross_validation import cross_val_score
 from sklearn.base import BaseEstimator
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
 
+from epitopes import imma2
 
 """
 Properties of MHC Class I Presented Peptides That
@@ -19,14 +19,14 @@ Jorg J. A. Calis1
 Alessandro Sette2
 """
 
-# Table 2 
+# Table 2
 kl_div = [ 0, 0, 0.10, 0.31, 0.30, 0.29, 0.26, 0.18, 0]
 
 class ImmunoEnhanceModel(BaseEstimator):
-  
+
   def __init__(self):
     self._aa_counts = [defaultdict(int), defaultdict(int)]
-  
+
   def fit(self, X, Y):
     for x, y in zip(X,Y):
       for aa in x:
@@ -37,14 +37,14 @@ class ImmunoEnhanceModel(BaseEstimator):
     return np.array( [ [0, self._predict_instance(x)] for x in X])
 
   def _predict_instance(self, pep):
-    return np.array(np.sum ( [kl_div[i] * 
+    return np.array(np.sum ( [kl_div[i] *
                                   np.log(self._aa_counts[1][aa] / self._aa_counts[0][aa]
                                )
                     for (i, aa) in enumerate(pep)]))
 
 if __name__ == '__main__':
   model = ImmunoEnhanceModel()
-  imm, non = imma.load_csv()
+  imm, non = imma2.load_classes()
   total = list(imm) + list(non)
   Y = np.ones(len(total), dtype='int')
   Y[len(imm):] = 0

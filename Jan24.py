@@ -1,22 +1,39 @@
-import numpy as np 
-import data 
-import amino_acid
-import iedb
-
-#X,Y = iedb.load_dataset(assay_group = 'cytotoxicity')
-X,Y = iedb.load_dataset()
-
+import numpy as np
 import sklearn
-import sklearn.cross_validation 
+import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.linear_model
 
+from epitopes import iedb, amino_acid, features
 
-print "Amino acid histogram vectors w/ Logistic Regression"
+"""
+Compare IEDB classification AUC on:
+  Logistic Regression vs. Random Forest
+  9mer vs. n-gram
+and:
+  LR weights vs. RF feature importances
+"""
+
+imm, non = iedb.load_tcell_classes(peptide_length = 9)
+X, Y = features.make_kmer_dataset(imm, non)
+X_1gram, Y_1gram = features.make_ngram_dataset(imm, non, max_ngram = 1)
+X_2gram, Y_2gram = features.make_ngram_dataset(imm, non, max_ngram = 2)
+
 lr = sklearn.linear_model.LogisticRegression()
-print "LR Accuracy", np.mean(sklearn.cross_validation.cross_val_score(lr, X, Y, cv = 10))
 
-lr.fit(X,Y)
+print "Amino acid 9mers w/ Logistic Regression"
+print "LR Accuracy", np.mean(sklearn.cross_validation.cross_val_score(lr, X, Y, cv = 10))
+lr.fit(X, Y)
+print "LR coefs", lr.coef_
+
+print "Amino acid unigrams w/ Logistic Regression"
+print "LR Accuracy", np.mean(sklearn.cross_validation.cross_val_score(lr, X_1gram, Y_1gram, cv = 10))
+lr.fit(X_1gram,Y_1gram)
+print "LR coefs", lr.coef_
+
+print "Amino acid bigrams w/ Logistic Regression"
+print "LR Accuracy", np.mean(sklearn.cross_validation.cross_val_score(lr, X_2gram, Y_2gram, cv = 10))
+lr.fit(X_2gram,Y_2gram)
 print "LR coefs", lr.coef_
 
 
@@ -24,22 +41,28 @@ n_classifiers = 200
 
 rf = sklearn.ensemble.RandomForestClassifier(n_classifiers)
 
-print "Amino acid histogram vectors w/ RF"
-print "RF Accuracy", np.mean(sklearn.cross_validation.cross_val_score(rf, X, Y, cv = 10))
-
+print "Amino acid 9mers RF"
+aucs = sklearn.cross_validation.cross_val_score(rf, X, Y, cv = 10, scoring = 'roc_auc')
+print "AUCs", aucs
+print "mean AUC", np.mean(aucs)
 rf.fit(X,Y)
+print "Features", rf.feature_importances_
+
+print "Amino acid unigram frequency"
+aucs = sklearn.cross_validation.cross_val_score(rf, X_1gram, Y_1gram, cv = 10, scoring = 'roc_auc')
+print "AUCs", aucs
+print "mean AUC", np.mean(aucs)
+rf.fit(X_1gram,Y_1gram)
+print "Features", rf.feature_importances_
+
+print "Amino acid bigram frequency"
+aucs = sklearn.cross_validation.cross_val_score(rf, X_2gram, Y_2gram, cv = 10, scoring = 'roc_auc')
+print "AUCs", aucs
+print "mean AUC", np.mean(aucs)
+rf.fit(X_2gram,Y_2gram)
 print "Features", rf.feature_importances_
 
 
 
-fns = [amino_acid.hydropathy, 
-       amino_acid.volume, 
-       amino_acid.pK_side_chain,
-       amino_acid.polarity, 
-       amino_acid.prct_exposed_residues,
-       amino_acid.hydrophilicity, 
-       amino_acid.accessible_surface_area,
-       amino_acid.local_flexibility,
-       amino_acid.accessible_surface_area_folded,
-       amino_acid.refractivity
-       ]
+
+

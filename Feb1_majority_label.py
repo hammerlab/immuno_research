@@ -2,171 +2,70 @@ import numpy as np
 
 
 import sklearn
-import sklearn.cross_validation 
+import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.linear_model
 
-import data 
-import amino_acid
-import iedb
-import reduced_alphabet 
+from epitopes import iedb
 import eval_dataset
+
 """
-# first try all species
-print "All species"
-X_all, Y_all = iedb.load_dataset(
-                 noisy_labels = 'keep',
-                 human = False, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_all, Y_all)
-
-
-# also try filtering out the contradictory entries
-print
-print "---"
-print "All species filtered"
-X_all_filter, Y_all_filter = iedb.load_dataset(
-                 noisy_labels = 'drop',
-                 human = False, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_all_filter, Y_all_filter)
-
-
-# also try filtering out the contradictory entries
-print
-print "---"
-print "All species noisy = positive"
-X_all_positive, Y_all_positive = iedb.load_dataset(
-                 noisy_labels = 'positive',
-                 human = False, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_all_positive, Y_all_positive)
-
-
-# also try filtering out the contradictory entries
-print
-print "---"
-print "All species noisy = negative"
-X_all_negative, Y_all_negative = iedb.load_dataset(
-                 noisy_labels = 'negative',
-                 human = False, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_all_negative, Y_all_negative)
-
-print 
-print "---"
-print "Human"
-X_human, Y_human = iedb.load_dataset(
-                 noisy_labels = 'keep',
-                 human = True, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_human, Y_human)
-
-
-print 
-print "---"
-print "Human filtered"
-X_human_filter, Y_human_filter = iedb.load_dataset(
-                 noisy_labels = 'drop',
-                 human = True, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_human_filter, Y_human_filter)
-
-
-print 
-print "---"
-print "Human noisy = positive"
-X_human_positive, Y_human_positive = iedb.load_dataset(
-                 noisy_labels = 'positive',
-                 human = True, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_human_positive, Y_human_positive)
-
-
-print 
-print "---"
-print "Human noisy = negative"
-X_human_negative, Y_human_negative = iedb.load_dataset(
-                 noisy_labels = 'negative',
-                 human = True, 
-                 hla_type1 = False,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
-eval_dataset.eval_cv(X_human_negative, Y_human_negative)
+Instead of dropping or keeping the noisy labels, started
+trying to just the majority vote. This is saner and became the default
 """
 
 
-
-print 
+print
 print "---"
 print "Human MHC1"
-X_human_mhc1_filter, Y_human_mhc1_filter = iedb.load_dataset(
+X_human_mhc1_filter, Y_human_mhc1_filter = iedb.load_tcell_ngrams(
                  noisy_labels = 'majority',
-                 human = True, 
-                 hla_type1 = True,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = False)
+                 human = True,
+                 mhc_class = 1)
 eval_dataset.eval_cv(X_human_mhc1_filter, Y_human_mhc1_filter)
 
 
 
-print 
+print
 print "---"
 print "No HLA-A2"
-X_no_hla_a2, Y_no_hla_a2 = iedb.load_dataset(
+X_no_hla_a2, Y_no_hla_a2 = iedb.load_tcell_ngrams(
                  noisy_labels = 'majority',
-                 human = True, 
-                 hla_type1 = True,
-                 exclude_hla_a2 = True, 
-                 only_hla_a2 = False)
+                 human = True,
+                 mhc_class = 1,
+                 exclude_hla_type = 'HLA-A2$|A-\*02')
 eval_dataset.eval_cv(X_no_hla_a2, Y_no_hla_a2)
 
 
-print 
+print
 print "---"
 print "Cross-accuracy for HLA-A2 data"
-X_hla_a2, Y_hla_a2 = iedb.load_dataset(
+X_hla_a2, Y_hla_a2 = iedb.load_tcell_ngrams(
                  noisy_labels = 'majority',
-                 human = True, 
-                 hla_type1 = True,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = True)
+                 human = True,
+                 mhc_class = 1,
+                 hla_type =  'HLA-A2$|A-\*02')
 eval_dataset.eval_split(X_no_hla_a2, Y_no_hla_a2, X_hla_a2, Y_hla_a2)
 
 
 
 
 
-print 
+print
 print "---"
 print "Cross-accuracy for HLA-A2 data filtered (assay_group = cytotoxity)"
-X_no_hla_a2_cytotoxicity, Y_no_hla_a2_cytotoxicity = iedb.load_dataset(
+X_no_hla_a2_cytotoxicity, Y_no_hla_a2_cytotoxicity = iedb.load_tcell_ngrams(
                  noisy_labels = 'majority',
-                 assay_group = 'cytotoxicity', 
-                 human = True, 
-                 hla_type1 = True,
-                 exclude_hla_a2 = True, 
-                 only_hla_a2 = False)
-X_hla_a2_cytotoxicity, Y_hla_a2_cytotoxicity = iedb.load_dataset(
+                 assay_group = 'cytotoxicity',
+                 human = True,
+                 mhc_class = 1,
+                 exclude_hla_type = 'HLA-A2$|A-\*02')
+X_hla_a2_cytotoxicity, Y_hla_a2_cytotoxicity = iedb.load_tcell_ngrams(
                  noisy_labels = 'majority',
-                 assay_group = 'cytotoxicity', 
-                 human = True, 
-                 hla_type1 = True,
-                 exclude_hla_a2 = False, 
-                 only_hla_a2 = True)
+                 assay_group = 'cytotoxicity',
+                 human = True,
+                 mhc_class = 1,
+
+                 hla_type = 'HLA-A2$|A-\*02')
 eval_dataset.eval_split(X_no_hla_a2_cytotoxicity, Y_no_hla_a2_cytotoxicity, X_hla_a2_cytotoxicity, Y_hla_a2_cytotoxicity)
 

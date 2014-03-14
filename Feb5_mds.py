@@ -1,15 +1,16 @@
-import scipy 
+import scipy
 import scipy.sparse
-import numpy as np 
+import numpy as np
 
-import iedb 
-import amino_acid 
-from amino_acid import peptide_to_indices
+
+from epitopes import iedb, amino_acid
+from epitopes.amino_acid import peptide_to_indices
+
 
 ASSAY = 'cytotoxicity'
 LENGTH = 9
 
-imm, non = iedb.load_csv(peptide_length = LENGTH, only_hla_a2 = False, assay_group = ASSAY)
+imm, non = iedb.load_tcell_classes(peptide_length = LENGTH, assay_group = ASSAY)
 imm = list(imm)
 non = list(non)
 
