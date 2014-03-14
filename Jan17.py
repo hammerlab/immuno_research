@@ -1,15 +1,11 @@
 import numpy as np
-import data
-import amino_acid
-
-from epitopes import imma2, features, amino_acid
-
-imm, non = imma2.load_classes()
-X,Y = features.make_kmer_dataset(imm, non)
-
 import sklearn
 import sklearn.cross_validation
 import sklearn.ensemble
+
+from epitopes import imma2, features, amino_acid
+imm, non = imma2.load_classes()
+X,Y = features.make_kmer_dataset(imm, non)
 
 n_classifiers = 50
 
