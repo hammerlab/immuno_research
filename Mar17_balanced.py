@@ -21,13 +21,15 @@ import sklearn
 import sklearn.cross_validation
 
 
-from epitopes import cri_tumor_antigens, iedb, features, reduced_alphabet
+from epitopes import \
+    (cri_tumor_antigens, iedb, features, reduced_alphabet, reference)
 
 import eval_dataset
 from balanced_ensemble import BalancedEnsembleClassifier
 
 cancer_peptides = cri_tumor_antigens.load_peptides(mhc_class = 1)
 
+# self_peptides = reference.load_peptide_set(nrows = 1000)
 
 # sweet over filtering criteria and n-gram transformation
 # parameters and for all parameter combos evaluate
@@ -39,34 +41,46 @@ for assay in ('cytotoxicity', None ):
     for mhc_class in (1, None):
         for alphabet in (reduced_alphabet.hp2, None):
             for max_ngram in (1, 2, 3):
-                param_str =  \
-                    "Assay %s, MHC Class %s, n-gram %s, HP2 %s" % \
-                    (assay, mhc_class, max_ngram, alphabet is not None)
-                print param_str
-                X, Y, vectorizer = iedb.load_tcell_ngrams(
-                    assay_group = assay,
-                    human = True,
-                    mhc_class = mhc_class,
-                    max_ngram = max_ngram,
-                    reduced_alphabet= alphabet,
-                    return_transformer = True)
+                for min_count in (5, None):
+                    param_str =  \
+                        "Assay %s, MHC %s, ngram %s, min_count %s, HP2 %s" % \
+                        (assay, mhc_class, max_ngram, min_count,
+                         alphabet is not None)
+                    print param_str
+                    X, Y, vectorizer = iedb.load_tcell_ngrams(
+                        assay_group = assay,
+                        human = True,
+                        mhc_class = mhc_class,
+                        max_ngram = max_ngram,
+                        reduced_alphabet= alphabet,
+                        min_count = min_count,
+                        return_transformer = True)
+                    print "Data shape", X.shape, "n_true", np.sum(Y)
+                    ensemble = BalancedEnsembleClassifier()
+
+                    accs = sklearn.cross_validation.cross_val_score(
+                        ensemble, X, Y, cv = 5)
+                    print "CV accuracy %0.4f (std %0.4f)" % \
+                        (np.mean(accs), np.std(accs))
+
+                    aucs = sklearn.cross_validation.cross_val_score(
+                        ensemble, X, Y, cv = 5, scoring='roc_auc')
+                    print "CV AUC %0.4f (std %0.4f)" % \
+                        (np.mean(aucs), np.std(aucs))
+
+                    ensemble.fit(X, Y)
+
+                    #X_self = vectorizer.transform(self_peptides)
+                    #Y_pred = ensemble.predict(X_self)
+                    #print "Self epitope accuracy %0.4f" % \
+                    #    (1.0 - np.mean(Y_pred))
+                    X_test = vectorizer.transform(cancer_peptides)
+                    Y_pred = ensemble.predict(X_test)
+                    print "Tumor antigen accuracy %0.4f" % (np.mean(Y_pred),)
+
+                    print "---"
+                    print
 
 
-                ensemble = BalancedEnsembleClassifier()
 
 
-                accs = sklearn.cross_validation.cross_val_score(
-                    ensemble, X, Y, cv = 5)
-                print "CV accuracy %s (std %s)" % (np.mean(accs), np.std(accs))
-
-                aucs = sklearn.cross_validation.cross_val_score(
-                    ensemble, X, Y, cv = 5, scoring='roc_auc')
-                print "CV AUC %s (std %s)" % (np.mean(aucs), np.std(aucs))
-
-                X_test = vectorizer.transform(cancer_peptides)
-                Y_test = np.array([True] * len(cancer_peptides))
-                ensemble.fit(X, Y)
-                Y_pred = ensemble.predict(X_test)
-                print "Validation accuracy", np.mean(Y_pred == Y_test)
-                print "---"
-                print
