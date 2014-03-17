@@ -16,6 +16,7 @@ from epitopes import (
     cri_tumor_antigens, iedb, features, reduced_alphabet, static_data
 )
 import eval_dataset
+
 cancer_peptides = cri_tumor_antigens.load_peptides(mhc_class = 1)
 
 self_peptides_file = join(static_data.DATA_DIR, 'Tumor_Self_Antigens_HLA_I.txt')
