@@ -99,13 +99,23 @@ class BalancedEnsembleClassifier(ClassifierMixin):
             Y += model.predict(X)
         return Y
 
+    def _add_probs(self, X):
+        Y = np.zeros(len(X), dtype=float)
+        for model in self.models:
+            Y += model.predict_proba(X)[:, 1]
+        return Y
+
+    def _mean_probs(self, X):
+        probs = self._add_probs(X)
+        probs /= len(self.models)
+        return probs
+
     def decision_function(self, X):
-        Y_count = self._predict_counts(X)
-        return Y_count.astype('float') / len(self.models)
+        return self._mean_probs(X)
 
     def predict_proba(self, X):
-        Y_prob = self.decision_functions(self.models)
-        return np.vstack([Y, 1.0 - Y]).T
+        Y_prob = self.decision_function(X)
+        return np.vstack([1.0 - Y_prob, Y_prob]).T
 
     def predict(self, X):
         Y_prob = self.decision_function(X)

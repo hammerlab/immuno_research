@@ -53,7 +53,7 @@ best_vectorizer = None
 best_params = None
 
 for assay in ('cytotoxicity', None ):
-    for alphabet in ('hp2', 'aromatic2', None):
+    for alphabet in ('hp_vs_aromatic', 'hp2', 'aromatic2'):
         for max_ngram in (1, 2, 3):
             if alphabet is None and max_ngram > 1:
                 continue
@@ -62,13 +62,11 @@ for assay in ('cytotoxicity', None ):
                 (assay, max_ngram, alphabet)
             d['param'].append(param_str)
             print param_str
-            if alphabet == 'hp2':
-                alphabet_dict =  reduced_alphabet.hp2
-            elif alphabet == 'aromatic2':
-                alphabet_dict = reduced_alphabet.aromatic2
-            else:
-                assert alphabet is None, alphabet
+            if alphabet is None:
                 alphabet_dict = None
+            else:
+                alphabet_dict = getattr(reduced_alphabet, alphabet)
+
             X, Y, vectorizer = iedb.load_tcell_ngrams(
                 assay_group = assay,
                 human = True,
