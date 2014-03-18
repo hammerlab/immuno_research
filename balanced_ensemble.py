@@ -16,6 +16,7 @@ from math import ceil
 
 import numpy as np
 import sklearn.ensemble
+import sklearn.linear_model
 
 from sklearn.base import ClassifierMixin
 
@@ -39,7 +40,7 @@ class BalancedEnsembleClassifier(ClassifierMixin):
         return {'n_estimators' : self.n_estimators}
 
     def set_params(self, **parameters):
-        n_estimators = parameters.pop('n_estimators', 50)
+        n_estimators = parameters.pop('n_estimators', 100)
         self.n_estimators = n_estimators
         assert len(parameters) == 0, \
             "Unexpected keywords %s" % (parameters.keys(),)
@@ -64,7 +65,7 @@ class BalancedEnsembleClassifier(ClassifierMixin):
         # subsample even the minority class
         # to randomly drop outliers and
         # create more diverse population of models
-        n_sub = int(0.75 * n_min)
+        n_sub = int(0.9 * n_min)
 
         n_models = 2 * int(ceil(float(n_total) / n_sub)) + 1
 
@@ -86,6 +87,7 @@ class BalancedEnsembleClassifier(ClassifierMixin):
 
             X_sub = np.vstack([X_true_sub, X_false_sub])
             Y_sub = np.concatenate([Y_true_sub, Y_false_sub])
+            #clf = sklearn.linear_model.LogisticRegression()
             clf = sklearn.ensemble.RandomForestClassifier(
                 n_estimators = self.n_estimators)
             clf.fit(X_sub, Y_sub)

@@ -131,7 +131,9 @@ print
 print "---"
 print "2-letter bigram"
 X2, Y2, f = iedb.load_tcell_ngrams(
-                 noisy_labels = 'majority', assay_group = ASSAY, subsample_bigger_class = True,
+                 noisy_labels = 'majority',
+                 assay_group = ASSAY,
+                 subsample_bigger_class = True,
                  human = True,
                  mhc_class = 1,
                  max_ngram = 2,
