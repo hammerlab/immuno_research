@@ -144,7 +144,7 @@ for assay in ('cytotoxicity', None, 'cytokine release IFNg',  ):
                 recall = pos_acc
                 f1_score = 2 * (precision * recall) / (precision + recall)
                 print "F-1 score: %0.4f" % f1_score
-                d['f1_score'] = f1_score
+                d['f1_score'].append(f1_score)
 
                 f_half_score = 1.25 * \
                     (precision * recall) / ((0.25 * precision) + recall)
