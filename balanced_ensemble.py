@@ -26,22 +26,29 @@ is more abundant than another. Implements the common "UnderBagging" approach
 found to work well in Galar et al.'s "A Review on Ensembles for the Class Imbalance Problem: Bagging-, Boosting-, and Hybrid-Based Approaches", but instead of sampling with replacement (to attain diversity), just randomly subsample the minority class.
 """
 
+
 def subsample_indices(n, k):
     idx = np.arange(n)
     np.random.shuffle(idx)
     return idx[:k]
-
 
 class BalancedEnsembleClassifier(ClassifierMixin):
     def __init__(self, **kwargs):
         self.set_params(**kwargs)
 
     def get_params(self, deep=True):
-        return {'n_estimators' : self.n_estimators}
+        return {
+            'n_estimators' : self.n_estimators,
+            'logistic_regression' :  self.logistic_regression
+        }
 
     def set_params(self, **parameters):
         n_estimators = parameters.pop('n_estimators', 100)
         self.n_estimators = n_estimators
+
+        logistic_regression = parameters.pop('logistic_regression', False)
+        self.logistic_regression = logistic_regression
+
         assert len(parameters) == 0, \
             "Unexpected keywords %s" % (parameters.keys(),)
 
@@ -87,9 +94,11 @@ class BalancedEnsembleClassifier(ClassifierMixin):
 
             X_sub = np.vstack([X_true_sub, X_false_sub])
             Y_sub = np.concatenate([Y_true_sub, Y_false_sub])
-            #clf = sklearn.linear_model.LogisticRegression()
-            clf = sklearn.ensemble.RandomForestClassifier(
-                n_estimators = self.n_estimators)
+            if self.logistic_regression:
+                clf = sklearn.linear_model.LogisticRegression()
+            else:
+                clf = sklearn.ensemble.RandomForestClassifier(
+                    n_estimators = self.n_estimators)
             clf.fit(X_sub, Y_sub)
             self.models.append(clf)
 
