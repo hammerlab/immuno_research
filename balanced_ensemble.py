@@ -53,18 +53,22 @@ class BalancedEnsembleClassifier(ClassifierMixin):
             "Unexpected keywords %s" % (parameters.keys(),)
 
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, W = None):
         self.models = []
         n_total = len(Y)
 
         true_mask = Y > 0
         X_true = X[true_mask]
         Y_true = Y[true_mask]
+        if W is not None:
+            W_true = W[true_mask]
         n_true = len(Y_true)
 
         false_mask = ~true_mask
         X_false = X[false_mask]
         Y_false = Y[false_mask]
+        if W is not None:
+            W_false = W[false_mask]
         n_false = len(Y_false)
 
         n_min = min(n_true, n_false)
@@ -87,19 +91,28 @@ class BalancedEnsembleClassifier(ClassifierMixin):
             true_idx = subsample_indices(n_true, n_sub)
             X_true_sub = X_true[true_idx]
             Y_true_sub = Y_true[true_idx]
+            if W is not None:
+                W_true_sub = W_true[true_idx]
 
             false_idx = subsample_indices(n_false, n_sub)
             X_false_sub  = X_false[false_idx]
             Y_false_sub = Y_false[false_idx]
+            if W is not None:
+                W_false_sub = W_false[false_idx]
 
             X_sub = np.vstack([X_true_sub, X_false_sub])
             Y_sub = np.concatenate([Y_true_sub, Y_false_sub])
+            if W is not None:
+                W_sub = np.concatenate([W_true_sub, W_false_sub])
             if self.logistic_regression:
                 clf = sklearn.linear_model.LogisticRegression()
             else:
                 clf = sklearn.ensemble.RandomForestClassifier(
                     n_estimators = self.n_estimators)
-            clf.fit(X_sub, Y_sub)
+            if W is None:
+                clf.fit(X_sub, Y_sub)
+            else:
+                clf.fit(X_sub, Y_sub, sample_weight = W_sub)
             self.models.append(clf)
 
     def _predict_counts(self, X):
