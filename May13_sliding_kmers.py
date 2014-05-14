@@ -54,7 +54,6 @@ recalls = []
 d = {
     'assay': [],
     'alphabet' : [],
-    'ngram' : [],
     'mhc': [],
     'min_count': [],
     'pos_acc': [],
@@ -72,7 +71,7 @@ best_params = None
 param_count = 0
 for assay in ('cytotoxicity', None, ):
     for mhc_class in (1, ):
-        for min_count in (3, 7, None):
+        for min_count in (3, 7,  None):
 
             imm, non = iedb.load_tcell_classes(
                 assay_group = assay,
