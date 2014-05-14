@@ -54,8 +54,10 @@ d = {
     'min_count': [],
     'pos_acc': [],
     'neg_acc' : [],
+    'acc' : [], 
     'f1_score':[],
     'f_score': [],
+    'cv_auc' : [], 
 }
 
 
@@ -65,10 +67,10 @@ best_params = None
 
 param_count = 0
 for assay in ('cytotoxicity', None):
-    for alphabet in ('gbmr4', 'sdm12', 'hsdm17', None):
-        for max_ngram in (2, 3):
+    for alphabet in ('hp2', 'hp_vs_aromatic', 'gbmr4', 'sdm12', 'hsdm17', None):
+        for max_ngram in (1, 2, 3, 4):
             for mhc_class in (1, None):
-                for min_count in (None,3,7):
+                for min_count in (None,3,5,7):
                     if alphabet is None:
                         alphabet_dict = None
                         n_letters = 20
@@ -79,7 +81,7 @@ for assay in ('cytotoxicity', None):
                     for i in xrange(max_ngram):
                         n_features += n_letters ** (i+1)
 
-                    if n_features > 200:
+                    if n_features > (4 ** 4 + 4 ** 3 + 4 ** 2 + 4):
                         continue
                     else:
                         param_count += 1
@@ -109,7 +111,12 @@ for assay in ('cytotoxicity', None):
 
                     print "Data shape", X.shape, "n_true", np.sum(Y)
                     ensemble = BalancedEnsembleClassifier()
-                    ensemble.fit(X, Y)
+                    aucs = sklearn.cross_validation.cross_val_score(
+                      ensemble, X, Y, cv = 5, scoring='roc_auc')
+		    print "CV AUC %0.4f (std %0.4f)" % (np.mean(aucs), np.std(aucs))
+                    d['cv_auc'].append(np.mean(aucs))
+
+		    ensemble.fit(X, Y)
 
                     X_pos_test = vectorizer.transform(pos_peptides)
                     Y_pos_pred = ensemble.predict(X_pos_test)
@@ -136,11 +143,16 @@ for assay in ('cytotoxicity', None):
 
                     print "F-0.5 score: %0.4f" % f_half_score
                     d['f_score'].append(f_half_score)
+
+                    acc = np.sqrt(pos_acc * neg_acc)
+                    print "sqrt(pos_acc * neg_acc) =", acc
+                    d['acc'].append(acc)
+                
                     print "---"
                     print
 
 df = pd.DataFrame(d)
-df = df.sort('f_score', ascending=False)
+df = df.sort('acc', ascending=False)
 print df.to_string()
 with open('May13_validation.csv', 'w') as f:
     df.to_csv(f)

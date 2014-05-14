@@ -61,6 +61,7 @@ d = {
     'f1_score':[],
     'f_score': [],
     'acc' : [],
+    'cv_auc': [], 
 }
 
 
@@ -70,8 +71,8 @@ best_params = None
 
 param_count = 0
 for assay in ('cytotoxicity', None, ):
-    for mhc_class in (1, ):
-        for min_count in (3, 7,  None):
+    for mhc_class in (1, None):
+        for min_count in (3, 5, 7,  None):
 
             imm, non = iedb.load_tcell_classes(
                 assay_group = assay,
@@ -104,7 +105,7 @@ for assay in ('cytotoxicity', None, ):
                     X = []
                     Counts = []
                     Indices = []
-                    for i, p in enumerate(reduced):
+                    for peptide_idx, p in enumerate(reduced):
                         n = len(p)
                         if n < kmer_length:
                             continue
@@ -113,7 +114,7 @@ for assay in ('cytotoxicity', None, ):
                             substr = p[i:i+kmer_length]
                             X.append(substr)
                             Counts.append(n_substrings)
-                            Indices.append(i)
+                            Indices.append(peptide_idx)
                     Counts = np.array(Counts)
                     Indices = np.array(Indices)
                     return X, Counts, Indices
@@ -152,19 +153,30 @@ for assay in ('cytotoxicity', None, ):
                 print "# imm = %d, # non = %d" % (len(imm), len(non))
                 print "Data shape", X.shape, "n_true", np.sum(Y)
                 
-                rf = BalancedEnsembleClassifier()
+                rf = BalancedEnsembleClassifier(n_estimators = 200)
+                aucs = sklearn.cross_validation.cross_val_score(
+	          rf, X, Y, cv = 5, scoring='roc_auc')
+		print "CV AUC %0.4f (std %0.4f)" % (np.mean(aucs), np.std(aucs))
+                d['cv_auc'].append(np.mean(aucs))
+                #rf = RandomForestClassifier(n_estimators = 100)
                 rf.fit(X, Y, W)
                 def predict(peptides):
-                    Y_pred = np.zeros(len(peptides), dtype=int)
+                    Y_pred = np.zeros(len(peptides), dtype=float)
+                    counts = np.zeros(len(peptides), dtype=int)
                     X_test, _, Indices = expand(peptides)
                     X_test = strings_to_array(X_test)
-                    Y_pred_raw = rf.predict(X_test)
-                    # renormalize to +1/-1 labels 
-                    Y_pred_raw =  -1 + 2 * (Y_pred_raw > 0)
+                    #Y_pred_raw = rf.predict(X_test)
+
+                    Y_pred_prob = rf.predict_proba(X_test)[:, 1]
+                    Y_pred_rescaled = (2 * (Y_pred_prob - 0.5))
+                    Y_pred_weight = np.sign(Y_pred_rescaled) * Y_pred_rescaled ** 2
                     # group outputs by the sample they came from, 
                     # at the end we'll have the majority vote 
-                    for (y,i) in zip(Y_pred_raw, Indices):
+                    #Y_pred = rf.predict(X_test)
+                    for (y,i) in zip(Y_pred_weight, Indices):
                         Y_pred[i] += y
+                        counts[i] += 1
+                    Y_pred /= counts 
                     return Y_pred >= 0
                 Y_pos_pred = predict(pos_peptides)
                 pos_acc = np.mean(Y_pos_pred)
@@ -183,10 +195,8 @@ for assay in ('cytotoxicity', None, ):
 
                 precision = tp / float(tp + fp)
                 recall = tp / float(tp + fn)
-                print "tp =", tp
-                print "fp =", fp
-                print "fn =", fn
-                print "tn =", tn
+                print "tp = %d, fp = %d, fn = %d, tn = %d" % \
+                    (tp, fp, fn, tn)
                 f1_score = 2 * (precision * recall) / (precision + recall)
                 print "F-1 score: %0.4f" % f1_score
                 d['f1_score'].append(f1_score)
@@ -205,7 +215,7 @@ for assay in ('cytotoxicity', None, ):
 df = pd.DataFrame(d)
 df = df.sort('acc', ascending=False)
 print df.to_string()
-with open('May13_validation.csv', 'w') as f:
+with open('May13_sliding_kmers.csv', 'w') as f:
     df.to_csv(f)
-with open('May13_validation.html', 'w') as f:
+with open('May13_sliding_kmers.html', 'w') as f:
     df.to_html(f)
