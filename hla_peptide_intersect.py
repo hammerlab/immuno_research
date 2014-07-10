@@ -16,7 +16,7 @@ The DataFrame is exported to a CSV file (output_path). Run the
 script with --families to group calculations by allele family
 (e.g. the set difference between the peptipes for A02* and B35*).
 
-Run the script with --family family to compare each allele with its own
+Run the script with --myfamily to compare each allele with its own
 allele family (minus itself).
 
 Run the script with --length or --ratio for non-Jaccard calculations.
