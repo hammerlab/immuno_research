@@ -19,7 +19,7 @@ num_failures = 0
 distance = PMBECDistance([1] * 9)
 for key_a in distance.covariance.keys():
     for key_b in distance.covariance.keys():
-        row_a = key_a[0] 
+        row_a = key_a[0]
         row_b = key_b[0]
         col_a = key_a[1]
         col_b = key_b[1]
@@ -44,7 +44,7 @@ def get_random_peptide():
         peptide_string += random.choice(AMINO_ACIDS)
     return peptide_string
 
-AMINO_ACIDS = ['W', 'F', 'Y', 'I', 'V', 'L', 'M', 'C', 'D', 'E', 'G', 
+AMINO_ACIDS = ['W', 'F', 'Y', 'I', 'V', 'L', 'M', 'C', 'D', 'E', 'G',
     'A', 'P', 'H', 'K', 'R', 'S', 'T', 'N', 'Q']
 num_failures = 0
 for i in xrange(0, 1000000):
@@ -64,7 +64,7 @@ for i in xrange(0, 1000000):
                  distance_ab, distance_bc, added_distance, distance_ac))
     else:
         if (DEBUG):
-            print("Success: %s, %s, %s / %f, %f, %f, %f" % 
+            print("Success: %s, %s, %s / %f, %f, %f, %f" %
                     (peptide_string_a, peptide_string_b, peptide_string_c,
                      distance_ab, distance_bc, added_distance, distance_ac))
 print("Number of peptide triangle failures: %d" % num_failures)
