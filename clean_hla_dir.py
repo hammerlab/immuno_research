@@ -21,14 +21,14 @@ def run():
         lines = [strip_info(line) for line in open(file_path)]
         new_path = path.join(args.outdir, filename)
         with open(new_path, 'a') as nf:
-            for line in lines:
-                nf.write(line)
+            output = '\n'.join(lines)
+            nf.write(output)
 
 def strip_info(line):
     line = line.strip()
-    line = line.split(' ')[0]
+    line = line.split()[0]
     line = line.split('\'')[0]
-    return line + '\n'
+    return line
 
 if __name__ == "__main__":
     run()
