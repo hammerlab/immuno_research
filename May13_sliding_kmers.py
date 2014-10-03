@@ -61,7 +61,6 @@ d = {
     'f1_score':[],
     'f_score': [],
     'acc' : [],
-    'cv_auc': [], 
 }
 
 
@@ -72,7 +71,7 @@ best_params = None
 param_count = 0
 for assay in ('cytotoxicity', None, ):
     for mhc_class in (1, None):
-        for min_count in (3, 5, 7,  None):
+        for min_count in (3, 5,  None):
 
             imm, non = iedb.load_tcell_classes(
                 assay_group = assay,
@@ -154,10 +153,10 @@ for assay in ('cytotoxicity', None, ):
                 print "Data shape", X.shape, "n_true", np.sum(Y)
                 
                 rf = BalancedEnsembleClassifier(n_estimators = 200)
-                aucs = sklearn.cross_validation.cross_val_score(
-	          rf, X, Y, cv = 5, scoring='roc_auc')
-		print "CV AUC %0.4f (std %0.4f)" % (np.mean(aucs), np.std(aucs))
-                d['cv_auc'].append(np.mean(aucs))
+                #aucs = sklearn.cross_validation.cross_val_score(
+	        #  rf, X, Y, cv = 10, scoring='roc_auc')
+		#print "CV AUC %0.4f (std %0.4f)" % (np.mean(aucs), np.std(aucs))
+                #d['cv_auc'].append(np.mean(aucs))
                 #rf = RandomForestClassifier(n_estimators = 100)
                 rf.fit(X, Y, W)
                 def predict(peptides):

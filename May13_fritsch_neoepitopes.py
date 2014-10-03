@@ -70,7 +70,7 @@ for assay in ('cytotoxicity', None):
     for alphabet in ('hp2', 'hp_vs_aromatic', 'gbmr4', 'sdm12', 'hsdm17', None):
         for max_ngram in (1, 2, 3, 4):
             for mhc_class in (1, None):
-                for min_count in (None,3,5,7):
+                for min_count in (None,3,5):
                     if alphabet is None:
                         alphabet_dict = None
                         n_letters = 20
